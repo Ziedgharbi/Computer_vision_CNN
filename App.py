@@ -54,7 +54,4 @@ classe=dict(zip(data.dx.unique(), range (1,len(data.dx.unique())+1)   ))
 data["target"]=data.dx.map(lambda x : classe[x]  )
 
 
-
 """------- do somes transformation on image and for each we train a model and voting for rslt ---------"""
-
-
