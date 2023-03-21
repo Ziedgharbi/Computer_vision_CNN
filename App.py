@@ -8,6 +8,13 @@ import os
 from glob import glob
 from PIL import Image
 from skimage import color, exposure
+from skimage.util import img_as_ubyte
+from skimage.filters import rank
+from skimage.morphology import disk
+
+import h5py
+
+
 
 project_directory= "C:/Users/pc/Nextcloud/Python/GITHUB/Computer_vision_CNN/"
 data_directory=project_directory+"data/"
@@ -89,13 +96,15 @@ for img in X:
     img = color.hsv2rgb(hsv)
     X_rgb_h.append(img)   
 
-  
+plt.imshow(X_rgb_h[1])  
+
 # ---- Grayscale
 X_gray=[]
 for img in X:
     img=color.rgb2gray(img)
     X_gray.append(img)
-           
+          
+plt.imshow(X_gray[1]) 
 
 # ---- Grayscale / Histogram Equalization
 X_gray_HE=[]
@@ -103,17 +112,27 @@ for img in X:
     img=color.rgb2gray(img)
     img=exposure.equalize_hist(img)
     X_gray_HE.append(img)
-    
 
-            
-        # ---- Grayscale / Local Histogram Equalization
-        if mode=='L-LHE':        
-            img=color.rgb2gray(img)
-            img = img_as_ubyte(img)
-            img=rank.equalize(img, disk(10))/255.
+plt.imshow(X_gray_HE[1])   
+     
+# ---- Grayscale / Local Histogram Equalization
+X_gray_L_HE=[]
+for img in X:
+    img=color.rgb2gray(img)
+    img = img_as_ubyte(img)
+    img=rank.equalize(img, disk(10))/255.
+    X_gray_L_HE.append(img)
         
-        # ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
-        if mode=='L-CLAHE':
-            img=color.rgb2gray(img)
-            img=exposure.equalize_adapthist(img)
+plt.imshow(X_gray_L_HE[1])  
+
+# ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
+X_gray_L_CLAHE=[]
+
+for img in X:
+    img=color.rgb2gray(img)
+    img=exposure.equalize_adapthist(img)
+    X_gray_L_CLAHE.append(img)
+
+plt.imshow(X_gray_L_CLAHE[1]) 
+
 
