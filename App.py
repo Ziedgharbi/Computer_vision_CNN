@@ -94,8 +94,7 @@ data["target"]=le.transform(data.dx)
 
 data.target.value_counts()
 
-n_sample=300 # you can chos other number
-
+n_sample=300 # you can choose other number : see unique value effectifs first
 
 data_balanced=pd.DataFrame()
 for i in data.target.unique() :
@@ -115,79 +114,84 @@ y=tf.keras.utils.to_categorical(y, num_classes=7)
 
 
 # transformation : 5 transformation 
-# ---- RGB / Histogram Equalization
-X_rgb_h=[]
-for img in X:
-    hsv = color.rgb2hsv(img)
-    hsv[:, :, 2] = exposure.equalize_hist(hsv[:, :, 2])
-    img = color.hsv2rgb(hsv)
-    X_rgb_h.append(img)   
 
-with h5py.File(data_transorfmed_directory+"X_rgb_h.h5", "w") as f:
-    f.create_dataset("X", data=X_rgb_h)
-    f.create_dataset("y", data=y)
 
-X_rgb_h[1].shape  ## dx,dy, dz
-
-# ---- Grayscale
-X_gray=[]
-for img in X:
-    img=color.rgb2gray(img)
-    img=np.expand_dims(img, axis=2)
-    X_gray.append(img)
+def image_transformation(X,y,data_transorfmed_directory) :
     
-with h5py.File(data_transorfmed_directory+"X_gray.h5", "w") as f:
-    f.create_dataset("X", data=X_gray)
-    f.create_dataset("y", data=y)
-          
-X_gray[1].shape ### dx,dy
+    # ---- RGB / Histogram Equalization
+    X_rgb_h=[]
+    for img in X:
+        hsv = color.rgb2hsv(img)
+        hsv[:, :, 2] = exposure.equalize_hist(hsv[:, :, 2])
+        img = color.hsv2rgb(hsv)
+        X_rgb_h.append(img)   
+
+    with h5py.File(data_transorfmed_directory+"X_rgb_h.h5", "w") as f:
+        f.create_dataset("X", data=X_rgb_h)
+        f.create_dataset("y", data=y)
+
+    #X_rgb_h[1].shape  ## dx,dy, dz
+
+    # ---- Grayscale
+    X_gray=[]
+    for img in X:
+        img=color.rgb2gray(img)
+        img=np.expand_dims(img, axis=2)
+        X_gray.append(img)
+        
+    with h5py.File(data_transorfmed_directory+"X_gray.h5", "w") as f:
+        f.create_dataset("X", data=X_gray)
+        f.create_dataset("y", data=y)
+              
+    #X_gray[1].shape ### dx,dy
 
 
-# ---- Grayscale / Histogram Equalization
-X_gray_HE=[]
-for img in X:
-    img=color.rgb2gray(img)
-    img=exposure.equalize_hist(img)
-    img=np.expand_dims(img, axis=2)
-    X_gray_HE.append(img)     ###################
+    # ---- Grayscale / Histogram Equalization
+    X_gray_HE=[]
+    for img in X:
+        img=color.rgb2gray(img)
+        img=exposure.equalize_hist(img)
+        img=np.expand_dims(img, axis=2)
+        X_gray_HE.append(img)     ###################
 
-with h5py.File(data_transorfmed_directory+"X_gray_HE.h5", "w") as f:
-    f.create_dataset("X", data=X_gray_HE)
-    f.create_dataset("y", data=y)
+    with h5py.File(data_transorfmed_directory+"X_gray_HE.h5", "w") as f:
+        f.create_dataset("X", data=X_gray_HE)
+        f.create_dataset("y", data=y)
 
-X_gray_HE[1].shape  # dx,dy
+    #X_gray_HE[1].shape  # dx,dy
 
-# ---- Grayscale / Local Histogram Equalization
-X_gray_L_HE=[]
-for img in X:
-    img=color.rgb2gray(img)
-    img = img_as_ubyte(img)
-    img=rank.equalize(img, disk(10))/255.
-    img=np.expand_dims(img, axis=2)
-    X_gray_L_HE.append(img)
-    
-with h5py.File(data_transorfmed_directory+"X_gray_L_HE.h5", "w") as f:
-    f.create_dataset("X", data=X_gray_L_HE)
-    f.create_dataset("y", data=y)
-  
-X_gray_L_HE[1].shape  # dx,dy      
-    
-# ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
-X_gray_L_CLAHE=[]
-for img in X:
-    img=color.rgb2gray(img)
-    img=exposure.equalize_adapthist(img)
-    img=np.expand_dims(img, axis=2)
-    X_gray_L_CLAHE.append(img)
+    # ---- Grayscale / Local Histogram Equalization
+    X_gray_L_HE=[]
+    for img in X:
+        img=color.rgb2gray(img)
+        img = img_as_ubyte(img)
+        img=rank.equalize(img, disk(10))/255.
+        img=np.expand_dims(img, axis=2)
+        X_gray_L_HE.append(img)
+        
+    with h5py.File(data_transorfmed_directory+"X_gray_L_HE.h5", "w") as f:
+        f.create_dataset("X", data=X_gray_L_HE)
+        f.create_dataset("y", data=y)
+      
+    #X_gray_L_HE[1].shape  # dx,dy      
+        
+    # ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
+    X_gray_L_CLAHE=[]
+    for img in X:
+        img=color.rgb2gray(img)
+        img=exposure.equalize_adapthist(img)
+        img=np.expand_dims(img, axis=2)
+        X_gray_L_CLAHE.append(img)
 
-with h5py.File(data_transorfmed_directory+"X_gray_L_CLAHE.h5", "w") as f:
-    f.create_dataset("X", data=X_gray_L_CLAHE)
-    f.create_dataset("y", data=y)
+    with h5py.File(data_transorfmed_directory+"X_gray_L_CLAHE.h5", "w") as f:
+        f.create_dataset("X", data=X_gray_L_CLAHE)
+        f.create_dataset("y", data=y)
 
-X_gray_L_CLAHE[1].shape  # dx,dy  
+    #X_gray_L_CLAHE[1].shape  # dx,dy
 
 
-transformation=["X_rgb_h", "X_gray", "X_gray_HE", "X_gray_L_HE" , "X_gray_L_CLAHE"]
+
+image_transformation(X)
 
 # create model 
 def create_model (dx,dy,dz) :
@@ -213,6 +217,8 @@ def create_model (dx,dy,dz) :
  
 
 ## train model with data generator from keras 
+
+transformation=["X_rgb_h", "X_gray", "X_gray_HE", "X_gray_L_HE" , "X_gray_L_CLAHE"]
 
 rslt={}
 epochs=10
