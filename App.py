@@ -81,12 +81,6 @@ class_cancer=list(classe.keys())
 
 data["target"]=data.dx.map(lambda x : classe[x]  )
 
- # or
-le=LabelEncoder()
-le.fit(data.dx)
-class_cancer=list(le.classes_)
-
-data["target"]=le.transform(data.dx)
 
 """------- do somes transformation on image and for each we train a model and voting for rslt ---------"""
 
@@ -94,7 +88,7 @@ data["target"]=le.transform(data.dx)
 
 data.target.value_counts()
 
-n_sample=300 # you can choose other number : see unique value effectifs first
+n_sample=500 # you can choose other number : see unique value effectifs first
 
 data_balanced=pd.DataFrame()
 for i in data.target.unique() :
@@ -117,6 +111,15 @@ y=tf.keras.utils.to_categorical(y, num_classes=7)
 
 
 def image_transformation(X,y,data_transorfmed_directory) :
+    
+    # no transofrmation
+    X_n=[]
+    for img in X:
+        X_n.append(img)   
+
+    with h5py.File(data_transorfmed_directory+"X_n.h5", "w") as f:
+        f.create_dataset("X", data=X_n)
+        f.create_dataset("y", data=y)
     
     # ---- RGB / Histogram Equalization
     X_rgb_h=[]
@@ -191,7 +194,7 @@ def image_transformation(X,y,data_transorfmed_directory) :
 
 
 
-image_transformation(X)
+image_transformation(X,y,data_transorfmed_directory)
 
 # create model 
 def create_model (dx,dy,dz) :
@@ -218,7 +221,7 @@ def create_model (dx,dy,dz) :
 
 ## train model with data generator from keras 
 
-transformation=["X_rgb_h", "X_gray", "X_gray_HE", "X_gray_L_HE" , "X_gray_L_CLAHE"]
+transformation=["X_rgb_h", "X_gray", "X_gray_HE", "X_gray_L_HE" , "X_gray_L_CLAHE","X_n"]
 
 rslt={}
 epochs=10
@@ -281,12 +284,12 @@ for trans in transformation:
     rslt[str(trans)]=history
     
 ## plot loss and accuracy for all models
-plt.subplots(5,2, figsize=(15,15))
+plt.subplots(6,2, figsize=(15,15))
 i=1
 for key, value in rslt.items():
     print(key)
     
-    plt.subplot(5,2, i)
+    plt.subplot(6,2, i)
     plt.plot(value.history["loss"] , label="Train loss")
     plt.plot(value.history["val_loss"] , label="Test loss")
     plt.legend()
@@ -294,7 +297,7 @@ for key, value in rslt.items():
     
     i=i+1
     
-    plt.subplot(5,2, i)
+    plt.subplot(6,2, i)
     plt.plot(value.history["accuracy"] , label="Train accuracy")
     plt.plot(value.history["val_accuracy"] , label="Test accuracy")
     plt.legend()
@@ -318,3 +321,78 @@ for key , value in matrix.items():
     disp.plot()
     plt.title("Confusion matrix for "+key)
     plt.show()
+    
+    
+    
+    
+## prediction test
+ 
+x= "C:/Users/pc/Nextcloud/Python/GITHUB/Computer_vision_CNN/data/images/ISIC_0024329.jpg"
+img = np.asarray(Image.open(x).resize((32,32)))
+img.shape
+plt.imshow(img)
+
+
+
+
+def image_transformation(img,trans) :
+    
+    # no transformation
+    
+    if trans=="n" :
+        img=img
+    
+    # ---- RGB / Histogram Equalization
+    if trans=="rgb_h" :
+        hsv = color.rgb2hsv(img)
+        hsv[:, :, 2] = exposure.equalize_hist(hsv[:, :, 2])
+        img = color.hsv2rgb(hsv)
+
+    # ---- Grayscale
+
+    if trans ==  "gray":
+        img=color.rgb2gray(img)
+        img=np.expand_dims(img, axis=2)
+     
+
+    # ---- Grayscale / Histogram Equalization
+    if trans =="gray_HE":
+        img=color.rgb2gray(img)
+        img=exposure.equalize_hist(img)
+        img=np.expand_dims(img, axis=2)
+
+
+    # ---- Grayscale / Local Histogram Equalization
+    if trans=="gray_L_HE":
+        img=color.rgb2gray(img)
+        img = img_as_ubyte(img)
+        img=rank.equalize(img, disk(10))/255.
+        img=np.expand_dims(img, axis=2)
+
+            
+        
+    # ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
+    if trans =="gray_L_CLAHE":
+        
+        img=color.rgb2gray(img)
+        img=exposure.equalize_adapthist(img)
+        img=np.expand_dims(img, axis=2)
+
+    return (img)
+
+
+
+
+model_list=["rgb_h", "gray_L_HE", "gray_L_CLAHE", "gray_HE", "gray","n"]
+
+
+rst={}
+for model in model_list :
+    
+    im= image_transformation(img, model)
+    im=im.reshape(-1,im.shape[0],im.shape[1],im.shape[2])    
+    m = keras.models.load_model(model_directory+'best_model_X_'+model+'.h5')
+    r=m.predict(im)
+    rst[model]=np.argmax(r)
+
+rst
