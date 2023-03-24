@@ -31,7 +31,6 @@ image_directory= data_directory +"images/"
 data_transorfmed_directory=project_directory+'transformed_data/'
 model_directory=project_directory+"model/"
 
-
 isExist = os.path.exists(data_transorfmed_directory)
 if not isExist:
 
@@ -64,7 +63,6 @@ for i in range(15):
     plt.imshow(data.image_array.iloc[random[i]])
     plt.title(data.dx.iloc[i])
 plt.show()
-
 
 # some descreptive statistic of classes 
 data.dx.value_counts().plot(kind='pie') # data are unbalanced, we should balance it
@@ -108,8 +106,6 @@ y=tf.keras.utils.to_categorical(y, num_classes=7)
 
 
 # transformation : 5 transformation 
-
-
 def image_transformation(X,y,data_transorfmed_directory) :
     
     # no transofrmation
@@ -147,7 +143,6 @@ def image_transformation(X,y,data_transorfmed_directory) :
         f.create_dataset("y", data=y)
               
     #X_gray[1].shape ### dx,dy
-
 
     # ---- Grayscale / Histogram Equalization
     X_gray_HE=[]
@@ -323,17 +318,12 @@ for key , value in matrix.items():
     plt.show()
     
     
-    
-    
 ## prediction test
  
 x= "C:/Users/pc/Nextcloud/Python/GITHUB/Computer_vision_CNN/data/images/ISIC_0024329.jpg"
 img = np.asarray(Image.open(x).resize((32,32)))
 img.shape
 plt.imshow(img)
-
-
-
 
 def image_transformation(img,trans) :
     
@@ -369,8 +359,6 @@ def image_transformation(img,trans) :
         img=rank.equalize(img, disk(10))/255.
         img=np.expand_dims(img, axis=2)
 
-            
-        
     # ---- Grayscale / Contrast Limited Adaptive Histogram Equalization (CLAHE)
     if trans =="gray_L_CLAHE":
         
