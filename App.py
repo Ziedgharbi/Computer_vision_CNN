@@ -66,7 +66,6 @@ plt.show()
 # some descreptive statistic of classes 
 data.dx.value_counts().plot(kind='pie') # data are unbalanced, we should balance it
 
-
 # some manuel encoding for taregt variable or use label encoder of sklearn
 """ nv : Melanocytic nevi  / mel : Melanoma    /
   bkl : Benign keratosis-like lesions  / bcc : Basal cell carcinoma
