@@ -51,7 +51,6 @@ data=df.sample(frac=frac, random_state=1)
 
 data["image_array"]= data['image_path'].map(lambda x: np.asarray(Image.open(x).resize((32,32))))
 
-
 # plot random picture
 n_sample=15
 random=np.random.randint(0,data.shape[0],n_sample)
